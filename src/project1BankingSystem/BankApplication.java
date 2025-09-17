@@ -1,4 +1,5 @@
 package project1BankingSystem;
+import Customer.CustomerId;
 
 import java.util.Scanner;
 
@@ -7,6 +8,7 @@ public class BankApplication {
 	public static void main(String[] args) {
 	        Scanner sc = new Scanner(System.in);
 	        int choice;
+	        CustomerId c1=new CustomerId(1001,"john", 987654321, "Chennai", "john@email.com");
 
 	        do {
 	            System.out.println("\n===== Mini Banking System =====");
@@ -20,14 +22,16 @@ public class BankApplication {
 	            System.out.println("8. Exit");
 	            System.out.print("Enter your choice: ");
 	            choice = sc.nextInt();
+	            
 
 	            switch (choice) {
 	                case 1:
 	                    System.out.println(" Create Account Selected");
 	                   
-	                    System.out.println("Enter Name: john");
-	                    System.out.println("Enter Account Type: Savings");
-	                    System.out.println(" Account Created! Account No: 1001");
+//	                    System.out.println("Enter Name: john");
+//	                    System.out.println("Enter Account Type: Savings");
+//	                    System.out.println(" Account Created! Account No: 1001");
+                    System.out.println("Account Created! Account No: " + c1);
 	                    break;
 
 	                case 2:
