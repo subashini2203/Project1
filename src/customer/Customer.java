@@ -1,17 +1,18 @@
 
-package Customer;
-import project1BankingSystem.BankApplication;
- public class CustomerId {
-	
-	    private String name;
+package customer;
+
+ public class Customer {
+	 
+	    private static int idCounter = 1000; 
 	    private int customerId;
+	    private String name;
 	    private long mobileNumber;
 	    private String address;
 	    private String emailId;
 
-	    public CustomerId(int customerId, String name, long mobileNumber, String address, String emailId) {
-	        this.customerId = customerId;
-	        this.name = name;
+	    public Customer( String name, long mobileNumber, String address, String emailId) {
+	        this.customerId =++idCounter;
+	        this.name = name; 
 	        this.mobileNumber = mobileNumber;
 	        this.address = address;
 	        this.emailId = emailId;

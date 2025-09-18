@@ -1,15 +1,19 @@
 package project1BankingSystem;
-import Customer.CustomerId;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
+import accounts.Account;
+import customer.Customer;
 
 public class BankApplication {
 
 	public static void main(String[] args) {
 	        Scanner sc = new Scanner(System.in);
+	        List<Customer> customers = new ArrayList<>();
+	        List<Account> accounts = new ArrayList<>();
 	        int choice;
-	        CustomerId c1=new CustomerId(1001,"john", 987654321, "Chennai", "john@email.com");
-
+	        
 	        do {
 	            System.out.println("\n===== Mini Banking System =====");
 	            System.out.println("1. Create Account (Savings/Current)");
@@ -22,88 +26,82 @@ public class BankApplication {
 	            System.out.println("8. Exit");
 	            System.out.print("Enter your choice: ");
 	            choice = sc.nextInt();
+	            sc.nextLine();
 	            
 
 	            switch (choice) {
 	                case 1:
-	                    System.out.println(" Create Account Selected");
-	                   
-//	                    System.out.println("Enter Name: john");
-//	                    System.out.println("Enter Account Type: Savings");
-//	                    System.out.println(" Account Created! Account No: 1001");
-                    System.out.println("Account Created! Account No: " + c1);
-	                    break;
+	                	 System.out.print("Enter name: ");
+	                     String name = sc.nextLine();
+	                     System.out.print("Enter mobile: ");
+	                     long mobile = sc.nextLong();
+	                     sc.nextLine();
+	                     System.out.print("Enter address: ");
+	                     String address = sc.nextLine();
+	                     System.out.print("Enter email: ");
+	                     String email = sc.nextLine();
+
+	                     Customer customer = new Customer(name, mobile, address, email);
+	                     customers.add(customer);
+
+	                     System.out.println(" Customer Created Successfully!");
+	                     System.out.println(customer);
+	                     break;
 
 	                case 2:
-	                    System.out.println(" Deposit Money Selected");
-	                    
-	                    System.out.println("Enter Account Number: 1001");
-	                    System.out.println("Enter Amount to Deposit: 3000");
-	                    System.out.println(" Deposit Successful! Updated Balance: 8000.0");
-	                    break;
+	                	if (customers.isEmpty()) {
+	                        System.out.println(" No customers found! Please create a customer first.");
+	                        break;
+	                    }
+	                	
+	                	 System.out.println("Available Customers:");
+	                	 
+	                     for (Customer c : customers) {
+	                         System.out.println(c.getCustomerId() + " - " + c.getName());
+	                     }
+	                     
+
+	                     System.out.print("Enter Customer ID for Account: ");
+	                     int custId = sc.nextInt();
+	                     sc.nextLine();
+	                     
+
+	                     Customer selectedCustomer = null;
+	                     for (Customer c : customers) {
+	                         if (c.getCustomerId() == custId) {
+	                             selectedCustomer = c;
+	                             break;
+	                         }
+	                     }
+
+	                     if (selectedCustomer == null) {
+	                         System.out.println(" Invalid Customer ID!");
+	                         break;
+	                     }
+
+	                     System.out.print("Enter Account Type (Savings/Current): ");
+	                     String accType = sc.nextLine();
+
+	                     System.out.print("Enter Initial Balance: ");
+	                     double balance = sc.nextDouble();
+
+	                     Account account = new Account(accType, balance, selectedCustomer);
+	                     accounts.add(account);
+
+	                     System.out.println("\n Account Created Successfully!");
+	                     System.out.println(account);
+	                     break;
 
 	                case 3:
-	                    System.out.println(" Withdraw Money Selected");
-	                    
-	                    System.out.println("Enter Account Number: 1001");
-	                    System.out.println("Enter Amount to Withdraw: 2000");
-	                    System.out.println(" Withdrawal Successful! Updated Balance: 6000.0");
-	                    break;
-
-	                case 4:
-	                    System.out.println(" View Account Details Selected");
-	                    
-	                    System.out.println("===== Account Details =====");
-	                    System.out.println("Account No: 1001");
-	                    System.out.println("Account Type: Savings");
-	                    System.out.println("Customer Name: john");
-	                    System.out.println("Balance: 6000.0");
-	                    break;
-	                    
-	                case 5:
-	                    System.out.println(" View Transaction History Selected");
-	                    
-	                    System.out.println("===== Transaction History =====");
-	                    System.out.println("TxnID: T001 | Deposit  | +3000 | Date: 2025-09-12 10:30");
-	                    System.out.println("TxnID: T002 | Withdraw | -2000 | Date: 2025-09-12 12:15");
-	                    break;
-
-	                case 6:
-	                    System.out.println(" Transfer Funds Selected");
-	                    
-	                    System.out.println("Enter From Account: 1001");
-	                    System.out.println("Enter To Account: 1002");
-	                    System.out.println("Enter Amount: 1000");
-	                    System.out.println(" Transfer Successful! New Balance: From=5000, To=7000");
-	                    break;
-
-	                case 7:
-	                    System.out.println(" Generate Account Statement Selected");
-	                    
-	                    System.out.println("===== Account Statement =====");
-	                    
-	                    System.out.println("Opening Balance: 5000.0");
-	                    System.out.println("TxnID: T001 | Deposit  | +3000 | Balance: 8000.0");
-	                    System.out.println("TxnID: T002 | Withdraw | -2000 | Balance: 6000.0");
-	                    System.out.println("Closing Balance: 6000.0");
-	                    break;
-	               
-	                case 8 :
-	                    System.out.println(" Exiting... Thank you!");
+	                    System.out.println("Exiting... Thank you!");
 	                    break;
 
 	                default:
-	                    System.out.println(" Invalid choice! Try again.");
+	                    System.out.println("Invalid choice! Try again.");
 	            }
-	        } while (choice != 8);
+	        } while (choice != 3);
 
 	        sc.close();
 	    }
-	
-		
-		
-
-
 	}
-
 
