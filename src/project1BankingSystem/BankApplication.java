@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import accounts.Account;
+import accounts.Account.InvalidPinException;
 import customer.Customer;
 
 public class BankApplication {
@@ -85,21 +86,93 @@ public class BankApplication {
 	                     System.out.print("Enter Initial Balance: ");
 	                     double balance = sc.nextDouble();
 
-	                     Account account = new Account(accType, balance, selectedCustomer);
+	                     System.out.print("Set 4-digit PIN: ");
+	                     int pin = sc.nextInt();
+	                     
+	                     Account account = new Account(selectedCustomer.getCustomerId(), accType, balance, pin);
 	                     accounts.add(account);
 
-	                     System.out.println("\n Account Created Successfully!");
-	                     System.out.println(account);
+	                    
+	                    System.out.println("\n Account Created Successfully!");
+	                    account.displayAccountDetails();
 	                     break;
 
 	                case 3:
-	                    System.out.println("Exiting... Thank you!");
+	                	if (accounts.isEmpty()) {
+	                        System.out.println(" No accounts found! Please create an account first.");
+	                        break;
+	                    }
+
+	                    System.out.print("Enter Account Number: ");
+	                    int accNum = sc.nextInt();
+	                    System.out.print("Enter PIN: ");
+	                    int depPin = sc.nextInt();
+	                    System.out.print("Enter Deposit Amount: ");
+	                    double depAmount = sc.nextDouble();
+
+	                    Account depAccount = null;
+	                    for (Account a : accounts) {
+	                        if (a.getAccountNumber() == accNum) {
+	                            depAccount = a;
+	                            break;
+	                        }
+	                    }
+
+	                    if (depAccount == null) {
+	                        System.out.println(" Invalid Account Number!");
+	                        break;
+	                    }
+
+	                    try {
+	                        depAccount.deposit(depAmount, depPin);
+	                    } catch (InvalidPinException e) {
+	                        System.out.println(e.getMessage());
+	                    }
 	                    break;
+	                    
+	                case 4: 
+	                    if (accounts.isEmpty()) {
+	                        System.out.println(" No accounts found! Please create an account first.");
+	                        break;
+	                    }
+
+	                    System.out.print("Enter Account Number: ");
+	                    int wAccNum = sc.nextInt();
+	                    System.out.print("Enter PIN: ");
+	                    int wPin = sc.nextInt();
+	                    System.out.print("Enter Withdraw Amount: ");
+	                    double wAmount = sc.nextDouble();
+
+	                    Account wAccount = null;
+	                    for (Account a : accounts) {
+	                        if (a.getAccountNumber() == wAccNum) {
+	                            wAccount = a;
+	                            break;
+	                        }
+	                    }
+
+	                    if (wAccount == null) {
+	                        System.out.println(" Invalid Account Number!");
+	                        break;
+	                    }
+
+	                    try {
+	                        wAccount.withdraw(wAmount, wPin);
+	                    } catch (InvalidPinException e) {
+	                        System.out.println(e.getMessage());
+	                    }
+	                    break;
+	                    
+	                case 5:
+	                    System.out.println(" Exiting... Thank you!");
+	                    break;
+
+
 
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
 	            }
-	        } while (choice != 3);
+	        } while (choice != 5);
 
 	        sc.close();
 	    }
