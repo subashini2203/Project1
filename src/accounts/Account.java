@@ -1,6 +1,8 @@
 package accounts;
+import java.util.ArrayList;
+import java.util.List;
+import accounts.Transaction;
 
-import accounts.InvaildPinException.InvalidPinException;
 import customer.Customer;
 
 public class Account {
@@ -12,12 +14,7 @@ public class Account {
     private double balance;
     private int pin; 
 
-    public static class InvalidPinException extends Exception {
-        public InvalidPinException(String message) {
-            super(message);
-        }
-    }
-
+   
 
     public Account(int customerId, String accountType, double initialBalance, int pin) {
     	 this.accountNumber = ++accCounter;
@@ -30,6 +27,7 @@ public class Account {
     public int getAccountNumber() {
         return accountNumber;
     }
+    
     public int getCustomerId() 
     { 
     	return customerId;
@@ -42,25 +40,61 @@ public class Account {
     public double getBalance() {
         return balance;
     }
+    private List<Transaction> transactions = new ArrayList<>();
+    public void deposit(double amount, int enteredPin) {
+    	
+        try {
+            if (enteredPin != pin) {
+                throw new InvalidPinException("Invalid PIN! Deposit denied.");
+            }
 
-    public void deposit(double amount, int enteredPin) throws InvalidPinException {
-        if (enteredPin != pin) {
-            throw new InvalidPinException(" Invalid PIN! Deposit denied.");
+            if (accountType.equalsIgnoreCase("Savings")) {
+                double minDeposit = 100;   
+                double maxDeposit = 50000; 
+
+                if (amount < minDeposit) {
+                    throw new Exception("Deposit Failed! Minimum deposit is: " + minDeposit);
+                }
+                if (amount > maxDeposit) {
+                    throw new Exception("Deposit Failed! Maximum deposit allowed is: " + maxDeposit);
+                }
+            }
+
+            balance += amount;
+            System.out.println("Deposited: " + amount + " | New Balance: " + balance);
+            transactions.add(new Transaction("Deposit", amount));
+
+        } catch (InvalidPinException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
-        balance += amount;
-        System.out.println(" Deposited: " + amount + " | New Balance: " + balance);
     }
-    public void withdraw(double amount, int enteredPin) throws InvalidPinException {
-        if (enteredPin != pin) {
-            throw new InvalidPinException(" Invalid PIN! Withdrawal denied.");
-        }
-        if (amount <= balance) {
+
+
+    public void withdraw(double amount, int enteredPin) {
+    	
+        try {
+            if (enteredPin != pin) {
+                throw new InvalidPinException("Invalid PIN! Withdrawal denied.");
+            }
+
+            if (amount > balance) {
+                throw new InsufficientBalanceException("Withdrawal Failed! Insufficient Balance. Available: " + balance);
+            }
+
             balance -= amount;
-            System.out.println(" Withdrawn: " + amount + " | New Balance: " + balance);
-        } else {
-            System.out.println(" Insufficient balance!");
+            System.out.println("Withdrawn: " + amount + " | New Balance: " + balance);
+            transactions.add(new Transaction("Withdraw",amount));
+
+        } catch (InvalidPinException e) {
+            System.out.println(e.getMessage());
+        } catch (InsufficientBalanceException e) {
+            System.out.println(e.getMessage());
         }
     }
+
+   
     public void displayAccountDetails() {
         System.out.println("Account Number: " + accountNumber);
         System.out.println("Customer ID: " + customerId);
@@ -68,6 +102,17 @@ public class Account {
         System.out.println("Balance: " + balance);
     }
 
+    public void showTransactionHistory() {
+    	
+        if (transactions.isEmpty()) {
+            System.out.println(" No transactions yet.");
+        } else {
+            System.out.println("Transaction History for Account " + accountNumber + ":");
+            for (Transaction t : transactions) {
+                System.out.println(t);
+            }
+        }
+    }
 @Override
 public String toString() {
     return "Account Number: " + accountNumber +

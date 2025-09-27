@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import accounts.Account;
-import accounts.Account.InvalidPinException;
+
+import accounts.InvalidPinException;
 import customer.Customer;
 
 public class BankApplication {
@@ -98,76 +99,89 @@ public class BankApplication {
 	                     break;
 
 	                case 3:
-	                	if (accounts.isEmpty()) {
-	                        System.out.println(" No accounts found! Please create an account first.");
-	                        break;
-	                    }
+//	                	if (accounts.isEmpty()) {
+//	                        System.out.println(" No accounts found! Please create an account first.");
+//	                        break;
+//	                    }
 
 	                    System.out.print("Enter Account Number: ");
 	                    int accNum = sc.nextInt();
+	                    
+	                    Account depAccount = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == accNum)
+	                            .findFirst()
+	                            .orElse(null);
+
+	                    if (depAccount == null) {
+	                        System.out.println("Invalid Account Number!");
+	                        break;
+	                    }
+	                    
 	                    System.out.print("Enter PIN: ");
 	                    int depPin = sc.nextInt();
 	                    System.out.print("Enter Deposit Amount: ");
 	                    double depAmount = sc.nextDouble();
 
-	                    Account depAccount = null;
-	                    for (Account a : accounts) {
-	                        if (a.getAccountNumber() == accNum) {
-	                            depAccount = a;
-	                            break;
-	                        }
-	                    }
+	                    depAccount.deposit(depAmount, depPin);
+	                    
+	                   break;
 
-	                    if (depAccount == null) {
-	                        System.out.println(" Invalid Account Number!");
-	                        break;
-	                    }
-
-	                    try {
-	                        depAccount.deposit(depAmount, depPin);
-	                    } catch (InvalidPinException e) {
-	                        System.out.println(e.getMessage());
-	                    }
-	                    break;
 	                    
 	                case 4: 
-	                    if (accounts.isEmpty()) {
-	                        System.out.println(" No accounts found! Please create an account first.");
-	                        break;
-	                    }
+//	                    if (accounts.isEmpty()) {
+//	                        System.out.println(" No accounts found! Please create an account first.");
+//	                        break;
+//	                    }
 
 	                    System.out.print("Enter Account Number: ");
 	                    int wAccNum = sc.nextInt();
-	                    System.out.print("Enter PIN: ");
-	                    int wPin = sc.nextInt();
-	                    System.out.print("Enter Withdraw Amount: ");
-	                    double wAmount = sc.nextDouble();
-
-	                    Account wAccount = null;
-	                    for (Account a : accounts) {
-	                        if (a.getAccountNumber() == wAccNum) {
-	                            wAccount = a;
-	                            break;
-	                        }
-	                    }
+	                    
+	                    Account wAccount = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == wAccNum)
+	                            .findFirst()
+	                            .orElse(null);
 
 	                    if (wAccount == null) {
 	                        System.out.println(" Invalid Account Number!");
 	                        break;
 	                    }
+	                   
 
-	                    try {
-	                        wAccount.withdraw(wAmount, wPin);
-	                    } catch (InvalidPinException e) {
-	                        System.out.println(e.getMessage());
-	                    }
+	                    System.out.print("Enter PIN: ");
+	                    int wPin = sc.nextInt();
+	                    System.out.print("Enter Withdraw Amount: ");
+	                    double wAmount = sc.nextDouble();
+
+	                   
+	                     wAccount.withdraw(wAmount, wPin);
 	                    break;
 	                    
 	                case 5:
-	                    System.out.println(" Exiting... Thank you!");
+	                	 if (accounts.isEmpty()) {
+	                         System.out.println("No accounts found!");
+	                         break;
+	                     }
+
+	                     System.out.print("Enter Account Number: ");
+	                     int viewAccNum = sc.nextInt();
+
+	                     Account viewAccount = accounts.stream()
+	                             .filter(a -> a.getAccountNumber() == viewAccNum)
+	                            .findFirst()
+	                             .orElse(null);
+
+	                     if (viewAccount == null) {
+	                         System.out.println("Invalid Account Number!");
+	                         break;
+	                     }
+
+	                     viewAccount.showTransactionHistory();
+	                     break;
+
+
+	                case 6:
+	                    System.out.println("Exiting... Thank you!");
 	                    break;
-
-
 
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
