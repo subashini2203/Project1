@@ -54,9 +54,11 @@ public class Account  {
                 double maxDeposit = 50000; 
 
                 if (amount < minDeposit) {
+                    //TODO create and throw MinDepositLimitNotMetException
                     throw new Exception("Deposit Failed! Minimum deposit is: " + minDeposit);
                 }
                 if (amount > maxDeposit) {
+                    //TODO create and throw MaxDepositLimitExceededException
                     throw new Exception("Deposit Failed! Maximum deposit allowed is: " + maxDeposit);
                 }
             }
