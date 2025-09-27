@@ -1,9 +1,11 @@
 
 package customer;
 
- public class Customer {
+import java.io.Serializable;
+
+public class Customer {
 	 
-	    private static int idCounter = 1000; 
+	  private static int idCounter = 1000; 
 	    private int customerId;
 	    private String name;
 	    private long mobileNumber;

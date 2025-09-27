@@ -1,13 +1,14 @@
 package accounts;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import accounts.Transaction;
 
 import customer.Customer;
 
-public class Account {
+public class Account  {
     
-    private static int accCounter = 2000;
+	  private static int accCounter = 2000;
     private int accountNumber;
     private int customerId; 
     private String accountType;  
