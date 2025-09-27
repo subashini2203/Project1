@@ -112,15 +112,17 @@ public class BankApplication {
 	                            .findFirst()
 	                            .orElse(null);
 
-	                    if (depAccount == null) {
+	                    if (depAccount == null) { //TODO use Optional for null checks
+							//TODO create and throw AccountNotFoundException
 	                        System.out.println("Invalid Account Number!");
 	                        break;
 	                    }
 	                    
+						
 	                    System.out.print("Enter PIN: ");
-	                    int depPin = sc.nextInt();
+	                    int depPin = sc.nextInt(); //TODO handle exception for non-integer input
 	                    System.out.print("Enter Deposit Amount: ");
-	                    double depAmount = sc.nextDouble();
+	                    double depAmount = sc.nextDouble(); //TODO handle exception for non-double input
 
 	                    depAccount.deposit(depAmount, depPin);
 	                    
