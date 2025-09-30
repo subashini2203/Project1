@@ -1,6 +1,7 @@
 package project1BankingSystem;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import accounts.Account;
@@ -14,34 +15,70 @@ public class BankApplication {
 	        Scanner sc = new Scanner(System.in);
 	        List<Customer> customers = new ArrayList<>();
 	        List<Account> accounts = new ArrayList<>();
-	        int choice;
+	        int choice = 0;
 	        
 	        do {
 	            System.out.println("\n===== Mini Banking System =====");
-	            System.out.println("1. Create Account (Savings/Current)");
-	            System.out.println("2. Deposit Money");
-	            System.out.println("3. Withdraw Money");
-	            System.out.println("4. View Account Details");
-	            System.out.println("5. View Transaction History");
-	            System.out.println("6. Transfer Funds Between Accounts");
-	            System.out.println("7. Generate Account Statement");
-	            System.out.println("8. Exit");
+	            System.out.println("1. Create Customer Account");
+	            System.out.println("2. Create Account (Savings/Current)");
+	            System.out.println("3. Deposit Money");
+	            System.out.println("4. Withdraw Money");
+	            System.out.println("5. View Account Details");
+	            System.out.println("6. View Transaction History");
+	            System.out.println("7. Transfer Funds Between Accounts");
+	            System.out.println("8. Generate Account Statement");
+	            System.out.println("9. Exit");
 	            System.out.print("Enter your choice: ");
-	            choice = sc.nextInt();
-	            sc.nextLine();
-	            
+	            String input = sc.nextLine();
+	            try {
+	                choice = Integer.parseInt(input);
+	            } catch (NumberFormatException e) {
+	                System.out.println("Invalid input! Please enter a number between 1 and 9.");
+	                continue; 
+	            }
 
 	            switch (choice) {
 	                case 1:
+	                	String name = "";
+	                    long mobile = 0;
+	                    String address = "";
+	                    String email = "";
+
 	                	 System.out.print("Enter name: ");
-	                     String name = sc.nextLine();
+	                	 name = sc.nextLine().trim();
+	                	    if (name.isEmpty()) {
+	                	        System.out.println(" Name cannot be empty!");
+	                	        break;
+	                	    }
+
+	                     
 	                     System.out.print("Enter mobile: ");
-	                     long mobile = sc.nextLong();
-	                     sc.nextLine();
+	                     try {
+	                         String mobileInput = sc.nextLine().trim();
+	                         mobile = Long.parseLong(mobileInput);
+	                         if (mobileInput.length() != 10) {
+	                             System.out.println("Mobile number must be 10 digits!");
+	                             break;
+	                         }
+	                     } catch (NumberFormatException e) {
+	                         System.out.println("Invalid mobile number!");
+	                         break;
+	                     }
+	                   
 	                     System.out.print("Enter address: ");
-	                     String address = sc.nextLine();
+	                     address = sc.nextLine().trim();
+	                     if (address.isEmpty()) {
+	                         System.out.println("Address cannot be empty!");
+	                         break;
+	                     }
+	                     
 	                     System.out.print("Enter email: ");
-	                     String email = sc.nextLine();
+	                   
+	                     email = sc.nextLine().trim();
+	                     if (!email.isEmpty() && !email.contains("@")) {
+	                         System.out.println(" Invalid email format!");
+	                         break;
+	                     }
 
 	                     Customer customer = new Customer(name, mobile, address, email);
 	                     customers.add(customer);
@@ -62,11 +99,17 @@ public class BankApplication {
 	                         System.out.println(c.getCustomerId() + " - " + c.getName());
 	                     }
 	                     
-
+	                     int custId = -1;
+	                     while (true) {
 	                     System.out.print("Enter Customer ID for Account: ");
-	                     int custId = sc.nextInt();
-	                     sc.nextLine();
-	                     
+	                     String custInput = sc.nextLine().trim();
+	                     try {
+	                         custId = Integer.parseInt(custInput);
+	                         break;
+	                     } catch (NumberFormatException e) {
+	                         System.out.println(" Invalid input! Please enter a valid Customer ID (numbers only).");
+	                     }
+	                 }
 
 	                     Customer selectedCustomer = null;
 	                     for (Customer c : customers) {
@@ -81,14 +124,47 @@ public class BankApplication {
 	                         break;
 	                     }
 
+	                     String accType = "";
+	                     while (true) {
 	                     System.out.print("Enter Account Type (Savings/Current): ");
-	                     String accType = sc.nextLine();
+	                     accType = sc.nextLine().trim();
+	                     if (accType.equalsIgnoreCase("Savings") || accType.equalsIgnoreCase("Current")) {
+	                         break;
+	                     } else {
+	                         System.out.println("Invalid account type! Please enter 'Savings' or 'Current'.");
+	                     }
+	                 }
 
+	                     double balance = 0;
+	                     while (true) {
 	                     System.out.print("Enter Initial Balance: ");
-	                     double balance = sc.nextDouble();
-
+	                     String balInput = sc.nextLine().trim();
+	                     try {
+	                         balance = Double.parseDouble(balInput);
+	                         if (balance < 0) {
+	                             System.out.println("Balance cannot be negative!");
+	                         } else {
+	                             break;
+	                         }
+	                     } catch (NumberFormatException e) {
+	                         System.out.println("Invalid input! Please enter a valid number.");
+	                     }
+	                 }
+	                     int pin = 0;
+	                     while (true) {
 	                     System.out.print("Set 4-digit PIN: ");
-	                     int pin = sc.nextInt();
+	                     String pinInput = sc.nextLine().trim();
+	                     try {
+	                         pin = Integer.parseInt(pinInput);
+	                         if (pin < 1000 || pin > 9999) {
+	                             System.out.println("PIN must be a 4-digit number!");
+	                         } else {
+	                             break;
+	                         }
+	                     } catch (NumberFormatException e) {
+	                         System.out.println("Invalid input! Please enter numbers only.");
+	                     }
+	                 }
 	                     
 	                     Account account = new Account(selectedCustomer.getCustomerId(), accType, balance, pin);
 	                     accounts.add(account);
@@ -103,26 +179,56 @@ public class BankApplication {
 //	                        System.out.println(" No accounts found! Please create an account first.");
 //	                        break;
 //	                    }
-
+	                	   int accNum = -1;
+	                	   while (true) {
 	                    System.out.print("Enter Account Number: ");
-	                    int accNum = sc.nextInt();
-	                    
-	                    Account depAccount = accounts.stream()
-	                            .filter(a -> a.getAccountNumber() == accNum)
-	                            .findFirst()
-	                            .orElse(null);
-
-	                    if (depAccount == null) { //TODO use Optional for null checks
-							//TODO create and throw AccountNotFoundException
-	                        System.out.println("Invalid Account Number!");
+	                    String input1 = sc.nextLine().trim();
+	                       try {
+	                          accNum = Integer.parseInt(input1);
 	                        break;
+	                    } catch (NumberFormatException e) {
+	                        System.out.println("Invalid input! Please enter numbers only for Account Number.");
 	                    }
-	                    
+	                }
+	                	   final int accountNumberToFind = accNum;
+	                	    Optional<Account> depAccountOpt = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == accountNumberToFind)
+	                            .findFirst();
+	                         
+
+	                	    if (depAccountOpt.isEmpty()) {
+	                	        System.out.println(" Invalid Account Number!");
+	                	        break;
+	                	    }
+	                	    Account depAccount = depAccountOpt.get();
 						
-	                    System.out.print("Enter PIN: ");
-	                    int depPin = sc.nextInt(); //TODO handle exception for non-integer input
-	                    System.out.print("Enter Deposit Amount: ");
-	                    double depAmount = sc.nextDouble(); //TODO handle exception for non-double input
+	                	    int depPin = -1;
+	                	    while (true) {
+	                      System.out.print("Enter PIN: ");
+	                      String pinInput = sc.nextLine().trim();
+	                      try {
+	                          depPin = Integer.parseInt(pinInput);
+	                          break;
+	                      } catch (NumberFormatException e) {
+	                          System.out.println(" Invalid PIN! Please enter numbers only.");
+	                      }
+	                  }
+	                	    
+	                	    double depAmount = 0;
+	                	    while (true) {
+	                      System.out.print("Enter Deposit Amount: ");
+	                      String amtInput = sc.nextLine().trim();
+	                      try {
+	                          depAmount = Double.parseDouble(amtInput);
+	                          if (depAmount <= 0) {
+	                              System.out.println("Deposit amount must be positive!");
+	                              continue;
+	                          }
+	                          break;
+	                      } catch (NumberFormatException e) {
+	                          System.out.println("Invalid input! Please enter numbers only for deposit amount.");
+	                      }
+	                  }
 
 	                    depAccount.deposit(depAmount, depPin);
 	                    
@@ -134,25 +240,55 @@ public class BankApplication {
 //	                        System.out.println(" No accounts found! Please create an account first.");
 //	                        break;
 //	                    }
-
+	                	 int wAccNum = -1;
+	                	  while (true) {
 	                    System.out.print("Enter Account Number: ");
-	                    int wAccNum = sc.nextInt();
-	                    
-	                    Account wAccount = accounts.stream()
-	                            .filter(a -> a.getAccountNumber() == wAccNum)
-	                            .findFirst()
-	                            .orElse(null);
+	                    String input2 = sc.nextLine().trim();
+	                    try {
+	                        wAccNum = Integer.parseInt(input2);
+	                        break;
+	                    } catch (NumberFormatException e) {
+	                        System.out.println(" Invalid input! Please enter numbers only for Account Number.");
+	                    }
+	                }
+	                	  final int withdrawAccountNumber = wAccNum;
+	                	  Optional<Account> wAccountOpt  = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == withdrawAccountNumber)
+	                            .findFirst();
+	                          
 
-	                    if (wAccount == null) {
+	                    if (wAccountOpt.isEmpty()) {
 	                        System.out.println(" Invalid Account Number!");
 	                        break;
 	                    }
-	                   
 
+	                    Account wAccount = wAccountOpt.get();
+	                    int wPin = -1;
+	                    while (true) {
 	                    System.out.print("Enter PIN: ");
-	                    int wPin = sc.nextInt();
+	                    String pinInput = sc.nextLine().trim();
+	                    try {
+	                        wPin = Integer.parseInt(pinInput);
+	                        break;
+	                    } catch (NumberFormatException e) {
+	                        System.out.println("Invalid PIN! Please enter numbers only.");
+	                    }
+	                }
+	                    double wAmount = 0;
+	                    while (true) {
 	                    System.out.print("Enter Withdraw Amount: ");
-	                    double wAmount = sc.nextDouble();
+	                    String amtInput = sc.nextLine().trim();
+	                    try {
+	                        wAmount = Double.parseDouble(amtInput);
+	                        if (wAmount <= 0) {
+	                            System.out.println(" Withdrawal amount must be positive!");
+	                            continue;
+	                        }
+	                        break;
+	                    } catch (NumberFormatException e) {
+	                        System.out.println("Invalid input! Please enter numbers only for withdrawal amount.");
+	                    }
+	                }
 
 	                   
 	                     wAccount.withdraw(wAmount, wPin);
@@ -188,7 +324,7 @@ public class BankApplication {
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
 	            }
-	        } while (choice != 5);
+	        } while (choice != 6);
 
 	        sc.close();
 	    }

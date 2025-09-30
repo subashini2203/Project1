@@ -46,7 +46,7 @@ public class Account  {
     	
         try {
             if (enteredPin != pin) {
-                throw new InvalidPinException("Invalid PIN! Deposit denied.");
+                throw new InvalidPinException();
             }
 
             if (accountType.equalsIgnoreCase("Savings")) {
@@ -55,22 +55,20 @@ public class Account  {
 
                 if (amount < minDeposit) {
                     //TODO create and throw MinDepositLimitNotMetException
-                    throw new Exception("Deposit Failed! Minimum deposit is: " + minDeposit);
+                	 throw new MinDepositLimitNotMetException(minDeposit);
                 }
                 if (amount > maxDeposit) {
                     //TODO create and throw MaxDepositLimitExceededException
-                    throw new Exception("Deposit Failed! Maximum deposit allowed is: " + maxDeposit);
+                	 throw new MaxDepositLimitExceededException(maxDeposit);
                 }
             }
-
+            double initial = balance;
             balance += amount;
             System.out.println("Deposited: " + amount + " | New Balance: " + balance);
             transactions.add(new Transaction("Deposit", amount));
 
-        } catch (InvalidPinException e) {
-            System.out.println(e.getMessage());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (InvalidPinException | MinDepositLimitNotMetException | MaxDepositLimitExceededException e) {
+            System.out.println("❌ " + e.getMessage());
         }
     }
 
@@ -82,21 +80,24 @@ public class Account  {
                 throw new InvalidPinException("Invalid PIN! Withdrawal denied.");
             }
 
+            
             if (amount > balance) {
-                throw new InsufficientBalanceException("Withdrawal Failed! Insufficient Balance. Available: " + balance);
+                throw new InsufficientBalanceException(
+                    " Withdrawal Failed! Insufficient Balance. Available: " + balance
+                );
             }
 
+          
             balance -= amount;
             System.out.println("Withdrawn: " + amount + " | New Balance: " + balance);
-            transactions.add(new Transaction("Withdraw",amount));
 
-        } catch (InvalidPinException e) {
-            System.out.println(e.getMessage());
-        } catch (InsufficientBalanceException e) {
+           
+            transactions.add(new Transaction("Withdraw", amount));
+
+        } catch (InvalidPinException | InsufficientBalanceException e) {
             System.out.println(e.getMessage());
         }
     }
-
    
     public void displayAccountDetails() {
         System.out.println("Account Number: " + accountNumber);
