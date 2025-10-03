@@ -9,7 +9,6 @@ public class InsufficientBalanceException extends Exception {
 	        super(message);
 	    }
 
-		// TODO add default constructor with default error message
 	}
 
 

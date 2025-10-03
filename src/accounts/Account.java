@@ -6,9 +6,10 @@ import accounts.Transaction;
 
 import customer.Customer;
 
-public class Account  {
-    
-	  private static int accCounter = 2000;
+public class Account implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private static int accCounter = 2000;
     private int accountNumber;
     private int customerId; 
     private String accountType;  
@@ -54,19 +55,20 @@ public class Account  {
                 double maxDeposit = 50000; 
 
                 if (amount < minDeposit) {
-                    //TODO create and throw MinDepositLimitNotMetException
+                    
                 	 throw new MinDepositLimitNotMetException(minDeposit);
                 }
                 if (amount > maxDeposit) {
-                    //TODO create and throw MaxDepositLimitExceededException
+                    
                 	 throw new MaxDepositLimitExceededException(maxDeposit);
                 }
             }
             double initial = balance;
             balance += amount;
             System.out.println("Deposited: " + amount + " | New Balance: " + balance);
-            transactions.add(new Transaction("Deposit", amount));
+            transactions.add(new Transaction(accountNumber, "Deposit", amount, initial, balance, "Success"));
 
+            
         } catch (InvalidPinException | MinDepositLimitNotMetException | MaxDepositLimitExceededException e) {
             System.out.println("❌ " + e.getMessage());
         }
@@ -87,17 +89,18 @@ public class Account  {
                 );
             }
 
-          
+            double initial = balance;
             balance -= amount;
             System.out.println("Withdrawn: " + amount + " | New Balance: " + balance);
 
-           
-            transactions.add(new Transaction("Withdraw", amount));
+            transactions.add(new Transaction(accountNumber, "Withdraw", amount, initial, balance, "Success"));
+
 
         } catch (InvalidPinException | InsufficientBalanceException e) {
             System.out.println(e.getMessage());
         }
     }
+   
    
     public void displayAccountDetails() {
         System.out.println("Account Number: " + accountNumber);
