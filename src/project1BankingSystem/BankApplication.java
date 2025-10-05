@@ -25,20 +25,26 @@ public class BankApplication {
     private static final String CUSTOMER_FILE = "customers.dat";
     private static final String ACCOUNT_FILE = "accounts.dat";
 
-    private static void loadData() {
+    private static Object loadData(String fileName) {
         ObjectInputStream ois = null;
+        Object data = null;
 
         
         try {
-            ois = new ObjectInputStream(new FileInputStream(CUSTOMER_FILE));
-            customers = (List<Customer>) ois.readObject();
-            System.out.println("Customers loaded successfully.");
+            ois = new ObjectInputStream(new FileInputStream(fileName));
+            data = ois.readObject();
+         
+            System.out.println(fileName + " loaded successfully.");
+            
         } catch (FileNotFoundException e) {
-            System.out.println("Customer data file not found. Starting fresh.");
+            System.out.println(fileName + " not found. Starting fresh.");
+            
         } catch (IOException e) {
-            System.out.println("Error loading customer data: " + e.getMessage());
+            System.out.println("Error loading data from " + fileName + ": " + e.getMessage());
+            
         } catch (ClassNotFoundException e) {
-            System.out.println("Error loading customer data: " + e.getMessage());
+            System.out.println("Error loading data from " + fileName + ": " + e.getMessage());
+        
         } finally {
             if (ois != null) {
                 try {
@@ -48,37 +54,43 @@ public class BankApplication {
                 }
             }
         }
+            return data;
+            
+        
+    }
+        private static void loadData() {
+        	try {
+        		customers = (List<Customer>)loadData(CUSTOMER_FILE);
+        		accounts = (List<Account>)loadData(ACCOUNT_FILE);
+        		
+        	    if (customers == null) customers = new ArrayList<>();
+        	    if (accounts == null) accounts = new ArrayList<>();
+
+        	    
+        	    if (!customers.isEmpty()) {
+        	        int maxId = customers.stream()
+        	                             .mapToInt(Customer::getCustomerId)
+        	                             .max()
+        	                             .getAsInt();
+        	        Customer.setIdCounter(maxId);
+        	    }
+        		 }catch(Exception e) {
+        		System.out.println("Error loading date:"+e.getMessage());
+        	}
+        }
+        
 
        
-        ois = null;
-        try {
-            ois = new ObjectInputStream(new FileInputStream(ACCOUNT_FILE));
-            accounts = (List<Account>) ois.readObject();
-            System.out.println("Accounts loaded successfully.");
-        } catch (FileNotFoundException e) {
-            System.out.println("Account data file not found. Starting fresh.");
-        } catch (IOException e) {
-            System.out.println("Error loading account data: " + e.getMessage());
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error loading account data: " + e.getMessage());
-        } finally {
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                   
-                }
-            }
-        }
-    }
 
-    private static void saveData() {
+    private static void saveData(String fileName,Object data) {
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(CUSTOMER_FILE));
-            oos.writeObject(customers);
+            oos = new ObjectOutputStream(new FileOutputStream(fileName));
+            oos.writeObject(data);
+            
         } catch (IOException e) {
             System.out.println("Error saving customer data: " + e.getMessage());
+            
         } finally {
             if (oos != null) {
                 try {
@@ -88,25 +100,15 @@ public class BankApplication {
                 }
             }
         }
-
-        oos = null;
-        try {
-            oos = new ObjectOutputStream(new FileOutputStream(ACCOUNT_FILE));
-            oos.writeObject(accounts);
-        } catch (IOException e) {
-            System.out.println("Error saving account data: " + e.getMessage());
-        } finally {
-            if (oos != null) {
-                try {
-                    oos.close();
-                } catch (IOException e) {
-                   
-                }
-            }
-        }
     }
+
+      private static void saveData() {
+    	  saveData(CUSTOMER_FILE,customers);
+    	  saveData(ACCOUNT_FILE,accounts);
+      }
+      
 	public static void main(String[] args) {
-		 loadData();
+		    loadData();
 	        int choice = 0;
 	        
 	        do {
@@ -298,7 +300,7 @@ public class BankApplication {
 	                	        break;
 	                	    }
 	                	    Account depAccount = depAccountOpt.get();
-						
+						    
 	                	    
 	                        System.out.print("Enter PIN: ");
 	                        String pinInput1 = sc.nextLine().trim();
@@ -416,6 +418,7 @@ public class BankApplication {
 
 	                	    System.out.println(" Account Details");
 	                	    viewAccount.displayAccountDetails();
+	                	    saveData();
 	                	    break;
 	                case 6:
 	                	 System.out.print("Enter Account Number: ");
@@ -439,11 +442,15 @@ public class BankApplication {
 
 	                	    System.out.println(" Transaction History");
 	                	    transAccount.showTransactionHistory();
+	                	    saveData();
 	                	    break;
-
+	                case 7:
+	                {
+	                	System.out.println("Exit");
+	                }
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
-	            }
+	        }
 	        } while (choice != 7);
 
 	        sc.close();

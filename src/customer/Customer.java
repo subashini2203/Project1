@@ -7,13 +7,17 @@ public class Customer implements Serializable {
     private static final long serialVersionUID = 1L;
 
 	 
-	  private static int idCounter = 1000; 
+	  private static int idCounter;
 	    private int customerId;
 	    private String name;
 	    private long mobileNumber;
 	    private String address;
 	    private String emailId;
-
+     
+	    public static void setIdCounter(int counter) {
+	        idCounter = counter;
+	    }
+	    
 	    public Customer( String name, long mobileNumber, String address, String emailId) {
 	        this.customerId =++idCounter;
 	        this.name = name; 
