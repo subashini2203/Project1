@@ -29,7 +29,7 @@ public class BankApplication {
         ObjectInputStream ois = null;
         Object data = null;
 
-        
+        //TODO use try with resources
         try {
             ois = new ObjectInputStream(new FileInputStream(fileName));
             data = ois.readObject();
@@ -74,6 +74,7 @@ public class BankApplication {
         	                             .getAsInt();
         	        Customer.setIdCounter(maxId);
         	    }
+				//TODO set account counter as well
         		 }catch(Exception e) {
         		System.out.println("Error loading date:"+e.getMessage());
         	}
@@ -446,6 +447,8 @@ public class BankApplication {
 	                	    break;
 	                case 7:
 	                {
+						//TODO add saveData call here, and remove from everywhere above
+						//TODO add break statment;
 	                	System.out.println("Exit");
 	                }
 	                default:
