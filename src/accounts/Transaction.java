@@ -36,6 +36,7 @@ public class Transaction implements Serializable {
 	                    " | Time: " + transactionTime +
 	                    " | Type: " + type +
 	                    " | From: " + accountNumber +
+	                     "|To:"+receiverAccountNumber+
 	                    " | Amount: " + amount +
 	                    " | Status: " + status +
 	                    " | Balance After: " + finalBalance;

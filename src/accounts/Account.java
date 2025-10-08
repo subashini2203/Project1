@@ -9,14 +9,16 @@ import customer.Customer;
 public class Account implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private static int accCounter = 2000;
+    private static int accCounter;
     private int accountNumber;
     private int customerId; 
     private String accountType;  
     private double balance;
     private int pin; 
 
-   
+   public static void setaccCounter(int accCounter1) {
+	   accCounter = accCounter1;
+   }
 
     public Account(int customerId, String accountType, double initialBalance, int pin) {
     	 this.accountNumber = ++accCounter;
@@ -43,6 +45,11 @@ public class Account implements Serializable {
         return balance;
     }
     private List<Transaction> transactions = new ArrayList<>();
+    
+    public boolean verifyPin(int enteredPin) {
+        return this.pin == enteredPin;
+    }
+    
     public void deposit(double amount, int enteredPin) {
     	
         try {
@@ -100,7 +107,19 @@ public class Account implements Serializable {
             System.out.println(e.getMessage());
         }
     }
-   
+    public void withdrawForTransfer(double amount, int receiverAccountNumber) {
+        double initial = balance;
+        balance -= amount;
+        System.out.println("Transferred Out: " + amount + " | New Balance: " + balance);
+        transactions.add(new Transaction(accountNumber, "Transfer to " + receiverAccountNumber, amount, initial, balance, "Success"));
+    }
+    public void depositForTransfer(double amount, int senderAccountNumber) {
+        double initial = balance;
+        balance += amount;
+        System.out.println("Transferred In: " + amount + " | New Balance: " + balance);
+        transactions.add(new Transaction(accountNumber, "Transfer from " + senderAccountNumber, amount, initial, balance, "Success"));
+    }
+
    
     public void displayAccountDetails() {
         System.out.println("Account Number: " + accountNumber);

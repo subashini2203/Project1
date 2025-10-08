@@ -7,7 +7,7 @@ public class Customer implements Serializable {
     private static final long serialVersionUID = 1L;
 
 	 
-	  private static int idCounter;
+	    private static int idCounter;
 	    private int customerId;
 	    private String name;
 	    private long mobileNumber;

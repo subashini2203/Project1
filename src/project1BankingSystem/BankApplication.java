@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-
 import accounts.Account;
-
 import accounts.InvalidPinException;
 import customer.Customer;
 
@@ -26,87 +24,66 @@ public class BankApplication {
     private static final String ACCOUNT_FILE = "accounts.dat";
 
     private static Object loadData(String fileName) {
-        ObjectInputStream ois = null;
-        Object data = null;
-
-        //TODO use try with resources
-        try {
-            ois = new ObjectInputStream(new FileInputStream(fileName));
-            data = ois.readObject();
-         
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
+            Object data = ois.readObject();
             System.out.println(fileName + " loaded successfully.");
-            
+            return data;
         } catch (FileNotFoundException e) {
             System.out.println(fileName + " not found. Starting fresh.");
-            
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading data from " + fileName + ": " + e.getMessage());
-            
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error loading data from " + fileName + ": " + e.getMessage());
-        
-        } finally {
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException e) {
-                   
-                }
-            }
         }
-            return data;
-            
-        
+        return null;
     }
-        private static void loadData() {
-        	try {
-        		customers = (List<Customer>)loadData(CUSTOMER_FILE);
-        		accounts = (List<Account>)loadData(ACCOUNT_FILE);
-        		
-        	    if (customers == null) customers = new ArrayList<>();
-        	    if (accounts == null) accounts = new ArrayList<>();
 
         	    
-        	    if (!customers.isEmpty()) {
-        	        int maxId = customers.stream()
-        	                             .mapToInt(Customer::getCustomerId)
-        	                             .max()
-        	                             .getAsInt();
-        	        Customer.setIdCounter(maxId);
-        	    }
-				//TODO set account counter as well
-        		 }catch(Exception e) {
-        		System.out.println("Error loading date:"+e.getMessage());
-        	}
-        }
-        
+        	
 
-       
-
-    private static void saveData(String fileName,Object data) {
-        ObjectOutputStream oos = null;
+    private static void loadData() {
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(fileName));
-            oos.writeObject(data);
-            
-        } catch (IOException e) {
-            System.out.println("Error saving customer data: " + e.getMessage());
-            
-        } finally {
-            if (oos != null) {
-                try {
-                    oos.close();
-                } catch (IOException e) {
-                 
-                }
+            customers = (List<Customer>) loadData(CUSTOMER_FILE);
+            accounts = (List<Account>) loadData(ACCOUNT_FILE);
+
+            if (customers == null) customers = new ArrayList<>();
+            if (accounts == null) accounts = new ArrayList<>();
+
+         
+            if (!customers.isEmpty()) {
+                int maxId = customers.stream()
+                        .mapToInt(Customer::getCustomerId)
+                        .max()
+                        .getAsInt();
+                Customer.setIdCounter(maxId);
             }
+            if(!accounts.isEmpty()) {
+            	int maxId = accounts.stream()
+            			    .mapToInt(Account::getAccountNumber)
+            			    .max()
+            			    .getAsInt();
+            	Account.setaccCounter(maxId);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error loading data: " + e.getMessage());
         }
     }
 
-      private static void saveData() {
-    	  saveData(CUSTOMER_FILE,customers);
-    	  saveData(ACCOUNT_FILE,accounts);
-      }
+   
+    private static void saveData(String fileName, Object data) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
+            oos.writeObject(data);
+        } catch (IOException e) {
+            System.out.println("Error saving data to " + fileName + ": " + e.getMessage());
+        }
+    }
+
+    
+    private static void saveData() {
+        saveData(CUSTOMER_FILE, customers);
+        saveData(ACCOUNT_FILE, accounts);
+    }
+
+
       
 	public static void main(String[] args) {
 		    loadData();
@@ -177,7 +154,7 @@ public class BankApplication {
 
 	                     Customer customer = new Customer(name, mobile, address, email);
 	                     customers.add(customer);
-	                     saveData();
+	                   
 
 	                     System.out.println(" Customer Created Successfully!");
 	                     System.out.println(customer);
@@ -268,7 +245,7 @@ public class BankApplication {
 	                     
 	                     Account account = new Account(selectedCustomer.getCustomerId(), accType , balance, pin);
 	                     accounts.add(account);
-	                     saveData();
+	                   
 	                    
 	                    System.out.println("\n Account Created Successfully!");
 	                    account.displayAccountDetails();
@@ -329,7 +306,7 @@ public class BankApplication {
 	
 
 	                     depAccount.deposit(depAmount, depPin);
-	                     saveData();
+	                   
 	                     break;
 
 	                    
@@ -393,7 +370,7 @@ public class BankApplication {
 
 	                   
 	                     wAccount.withdraw(wAmount, wPin);
-	                     saveData();
+	                  
 	                    break;
 	                    
 	                case 5:
@@ -419,7 +396,7 @@ public class BankApplication {
 
 	                	    System.out.println(" Account Details");
 	                	    viewAccount.displayAccountDetails();
-	                	    saveData();
+	                	
 	                	    break;
 	                case 6:
 	                	 System.out.print("Enter Account Number: ");
@@ -443,13 +420,81 @@ public class BankApplication {
 
 	                	    System.out.println(" Transaction History");
 	                	    transAccount.showTransactionHistory();
-	                	    saveData();
+	                	  
 	                	    break;
 	                case 7:
+	                	System.out.println("Transfer Funds Between Accounts ");
+
+	                  
+	                    System.out.print("Enter source account number: ");
+	                    int sourceAccNo = sc.nextInt();
+
+	                    Account sourceAcc = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == sourceAccNo)
+	                            .findFirst()
+	                            .orElse(null);
+
+	                    if (sourceAcc == null) {
+	                        System.out.println("Source account not found!");
+	                        break;
+	                    }
+
+	                   
+	                    System.out.print("Enter PIN for source account: ");
+	                    int pin1 = sc.nextInt();
+
+	                    if (!sourceAcc.verifyPin(pin1)) {
+	                        System.out.println("Invalid PIN! Transfer cancelled.");
+	                        break;
+	                    }
+
+	                    System.out.print("Enter destination account number: ");
+	                    int destAccNo = sc.nextInt();
+
+	                    Account destAcc = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == destAccNo)
+	                            .findFirst()
+	                            .orElse(null);
+
+	                    if (destAcc == null) {
+	                        System.out.println("Destination account not found!");
+	                        break;
+	                    }
+
+	                   
+	                    if (sourceAccNo == destAccNo) {
+	                        System.out.println("Cannot transfer to the same account!");
+	                        break;
+	                    }
+
+	                
+	                    System.out.print("Enter amount to transfer: ");
+	                    double amount = sc.nextDouble();
+
+	                    if (amount <= 0) {
+	                        System.out.println("Invalid amount!");
+	                        break;
+	                    }
+
+	                 
+	                    if (sourceAcc.getBalance() < amount) {
+	                        System.out.println("Insufficient balance!");
+	                        break;
+	                    }
+
+	                    sourceAcc.withdrawForTransfer(amount, destAccNo);
+	                    destAcc.depositForTransfer(amount, sourceAccNo);
+
+	                    System.out.println("Transfer successful!");
+	                    System.out.println("₹" + amount + " transferred from Account " + sourceAccNo + " to " + destAccNo);
+	                    System.out.println("New Source Balance: ₹" + sourceAcc.getBalance());
+	                    break;
+	                    
+	                case 8:
 	                {
-						//TODO add saveData call here, and remove from everywhere above
-						//TODO add break statment;
 	                	System.out.println("Exit");
+	                	saveData();
+	                	break;
 	                }
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
