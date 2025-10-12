@@ -73,7 +73,8 @@ public class Account implements Serializable {
             double initial = balance;
             balance += amount;
             System.out.println("Deposited: " + amount + " | New Balance: " + balance);
-            transactions.add(new Transaction(accountNumber, "Deposit", amount, initial, balance, "Success"));
+            int txnId = Transaction.getTransactionCounter();
+            transactions.add(new Transaction(txnId,accountNumber, "Deposit", amount, initial, balance, "Success"));
 
             
         } catch (InvalidPinException | MinDepositLimitNotMetException | MaxDepositLimitExceededException e) {
@@ -82,7 +83,7 @@ public class Account implements Serializable {
     }
 
 
-    public void withdraw(double amount, int enteredPin) {
+    public boolean withdraw(double amount, int enteredPin) {
     	
         try {
             if (enteredPin != pin) {
@@ -99,25 +100,29 @@ public class Account implements Serializable {
             double initial = balance;
             balance -= amount;
             System.out.println("Withdrawn: " + amount + " | New Balance: " + balance);
+            
+            int txnId = Transaction.getTransactionCounter();
+            transactions.add(new Transaction(txnId,accountNumber, "Withdraw", amount, initial, balance, "Success"));
 
-            transactions.add(new Transaction(accountNumber, "Withdraw", amount, initial, balance, "Success"));
-
-
+            return true;
         } catch (InvalidPinException | InsufficientBalanceException e) {
             System.out.println(e.getMessage());
+            return false;
         }
     }
     public void withdrawForTransfer(double amount, int receiverAccountNumber) {
         double initial = balance;
         balance -= amount;
         System.out.println("Transferred Out: " + amount + " | New Balance: " + balance);
-        transactions.add(new Transaction(accountNumber, "Transfer to " + receiverAccountNumber, amount, initial, balance, "Success"));
+        int txnId = Transaction.getTransactionCounter();
+        transactions.add(new Transaction(txnId,accountNumber, "Transfer to " + receiverAccountNumber, amount, initial, balance, "Success"));
     }
     public void depositForTransfer(double amount, int senderAccountNumber) {
         double initial = balance;
         balance += amount;
         System.out.println("Transferred In: " + amount + " | New Balance: " + balance);
-        transactions.add(new Transaction(accountNumber, "Transfer from " + senderAccountNumber, amount, initial, balance, "Success"));
+        int txnId = Transaction.getTransactionCounter();
+        transactions.add(new Transaction(txnId ,accountNumber, "Transfer from " + senderAccountNumber, amount, initial, balance, "Success"));
     }
 
    

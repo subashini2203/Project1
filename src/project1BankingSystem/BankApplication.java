@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,15 +14,18 @@ import java.util.Scanner;
 import accounts.Account;
 import accounts.InvalidPinException;
 import customer.Customer;
+import accounts.Transaction;
 
 public class BankApplication {
 	
 	private static Scanner sc = new Scanner(System.in);
     private static List<Customer> customers = new ArrayList<>();
     private static List<Account> accounts = new ArrayList<>();
+    private static List<Transaction> transactions = new ArrayList<>();
 
     private static final String CUSTOMER_FILE = "customers.dat";
     private static final String ACCOUNT_FILE = "accounts.dat";
+    private static final String TRANSACTION_FILE = "transactions.dat";
 
     private static Object loadData(String fileName) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
@@ -40,13 +44,15 @@ public class BankApplication {
         	
 
     private static void loadData() {
-        try {
+   
             customers = (List<Customer>) loadData(CUSTOMER_FILE);
             accounts = (List<Account>) loadData(ACCOUNT_FILE);
+            transactions = (List<Transaction>) loadData(TRANSACTION_FILE);
+           
 
             if (customers == null) customers = new ArrayList<>();
             if (accounts == null) accounts = new ArrayList<>();
-
+            if (transactions == null) transactions = new ArrayList<>();
          
             if (!customers.isEmpty()) {
                 int maxId = customers.stream()
@@ -62,13 +68,19 @@ public class BankApplication {
             			    .getAsInt();
             	Account.setaccCounter(maxId);
             }
-
-        } catch (Exception e) {
-            System.out.println("Error loading data: " + e.getMessage());
+            if (!transactions.isEmpty()) {
+                int maxTid = transactions.stream().
+                		mapToInt(Transaction::getTransactionId)
+                		.max()
+                		.getAsInt();
+                
+                Transaction.setTransactionCounter(maxTid);
+               
+            }
         }
-    }
 
-   
+
+
     private static void saveData(String fileName, Object data) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName))) {
             oos.writeObject(data);
@@ -81,8 +93,16 @@ public class BankApplication {
     private static void saveData() {
         saveData(CUSTOMER_FILE, customers);
         saveData(ACCOUNT_FILE, accounts);
+        saveData(TRANSACTION_FILE, transactions);
     }
-
+    private static Account findAccount(int accountNumber) {
+        for (Account acc : accounts) {
+            if (acc.getAccountNumber() == accountNumber) {
+                return acc;
+            }
+        }
+        return null;
+    }
 
       
 	public static void main(String[] args) {
@@ -303,19 +323,22 @@ public class BankApplication {
 	                          System.out.println("Invalid input! Returning to main menu");
 	                          break;
 	                          }
-	
+	                       double initialBal = depAccount.getBalance();
+	                       depAccount.deposit(depAmount, depPin);
+	                       double finalBal = depAccount.getBalance();
+	                       
+	                       int txnId = Transaction.getTransactionCounter();
+	                       Transaction t = new Transaction(txnId ,accNum, "Deposit", depAmount, initialBal, finalBal, "Success");
+	                       transactions.add(t);
+	                  
+	                       System.out.println("Deposit successful! Transaction ID: " + t.getTransactionId());
 
-	                     depAccount.deposit(depAmount, depPin);
-	                   
+
 	                     break;
 
 	                    
 	                case 4: 
-//	                    if (accounts.isEmpty()) {
-//	                        System.out.println(" No accounts found! Please create an account first.");
-//	                        break;
-//	                    }
-	                	
+               	
 	                    System.out.print("Enter Account Number: ");
 	                    String input2 = sc.nextLine().trim();
 	                    int wAccNum;
@@ -366,14 +389,26 @@ public class BankApplication {
 	                        System.out.println("Invalid input! Please enter numbers only for withdrawal amount.");
 	                        break;
 	                        }
-	                
+	                    double initialBalW = wAccount.getBalance();
+	                    boolean success =  wAccount.withdraw(wAmount,wPin);
+	                    double finalBalW =wAccount.getBalance();
+
+	                    String status = success ? "Success" : "Failed";
+	                    int wTxnId = Transaction.getTransactionCounter();
+	                    Transaction t2 = new Transaction(wTxnId,wAccount.getAccountNumber(), "Withdraw", wAmount, initialBalW, finalBalW, status);
+	                    transactions.add(t2);
+
+	                    saveData();
+
+	                    if (success)
+	                        System.out.println("Withdrawal successful! Transaction ID: " + t2.getTransactionId());
+	                    else
+	                        System.out.println("Withdrawal failed! Transaction ID: " + t2.getTransactionId());
+	                    break;
 
 	                   
-	                     wAccount.withdraw(wAmount, wPin);
-	                  
-	                    break;
-	                    
-	                case 5:
+
+	                  case 5:
 	                	
                           System.out.print("Enter Account Number: ");
 	                	    int viewAccNum;
@@ -398,6 +433,8 @@ public class BankApplication {
 	                	    viewAccount.displayAccountDetails();
 	                	
 	                	    break;
+	                	    
+	                	    
 	                case 6:
 	                	 System.out.print("Enter Account Number: ");
 	                	    int transAccNum;
@@ -422,6 +459,8 @@ public class BankApplication {
 	                	    transAccount.showTransactionHistory();
 	                	  
 	                	    break;
+	                	    
+	                	    
 	                case 7:
 	                	System.out.println("Transfer Funds Between Accounts ");
 
@@ -481,16 +520,125 @@ public class BankApplication {
 	                        System.out.println("Insufficient balance!");
 	                        break;
 	                    }
+	                   
+	                
+                        double initialSourceBal = sourceAcc.getBalance();
+	                    boolean withdrawSuccess = sourceAcc.withdraw(amount, pin1);
+                        double finalSourceBal = sourceAcc.getBalance();
+                        
+                        if (!withdrawSuccess) {
+	                        System.out.println("Transfer failed during withdrawal!");
+	                        break;
+	                    }
+                        
+                        double initialDestBal = destAcc.getBalance();
+                        destAcc.depositForTransfer(amount, sourceAccNo);
+	                    double finalDestBal = destAcc.getBalance();
 
-	                    sourceAcc.withdrawForTransfer(amount, destAccNo);
-	                    destAcc.depositForTransfer(amount, sourceAccNo);
+	                    int txsIdTransfer = Transaction.getTransactionCounter();
+	                    Transaction tSource = new Transaction( txsIdTransfer,sourceAccNo, "Transfer Out", amount, initialSourceBal, finalSourceBal, "Success");
+	                    
+	                    int txnIdDest = Transaction.getTransactionCounter();
+	                    Transaction tDest = new Transaction(txnIdDest,destAccNo, "Transfer In", amount, initialDestBal, finalDestBal, "Success");
+
+	                    transactions.add(tSource);
+	                    transactions.add(tDest);
 
 	                    System.out.println("Transfer successful!");
 	                    System.out.println("₹" + amount + " transferred from Account " + sourceAccNo + " to " + destAccNo);
-	                    System.out.println("New Source Balance: ₹" + sourceAcc.getBalance());
+	                    System.out.println("Source Transaction ID: " + tSource.getTransactionId());
+	                    System.out.println("Destination Transaction ID: " + tDest.getTransactionId());
+	            
+	                    // ----- Submenu -----
+	                    int subChoice;
+	                    do {
+	                        System.out.println("\n=== Transfer Submenu ===");
+	                        System.out.println("1. View All Transactions");
+	                        System.out.println("2. View Last 1 Hour Transactions");
+	                        System.out.println("3. View Last 3 Hours Transactions");
+	                        System.out.println("4. Return to Main Menu");
+	                        System.out.print("Enter your choice: ");
+	                        subChoice = sc.nextInt();
+
+	                        if (subChoice == 1) {
+	                            System.out.println(" All Transactions ");
+	                            transactions.forEach(System.out::println);
+	                            
+	                        } else if (subChoice == 2) {
+	                            LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+	                            System.out.println(" Transactions in Last 1 Hour");
+	                            transactions.stream()
+	                                    .filter(tx -> tx.getTime().isAfter(oneHourAgo))
+	                                    .forEach(System.out::println);
+	                            
+	                        } else if (subChoice == 3) 
+	                        {
+	                            LocalDateTime threeHoursAgo = LocalDateTime.now().minusHours(3);
+	                            System.out.println(" Transactions in Last 3 Hours");
+	                            transactions.stream()
+	                                    .filter(tx -> tx.getTime().isAfter(threeHoursAgo))
+	                                    .forEach(System.out::println);
+	                            
+	                        } else if (subChoice == 4) {
+	                            System.out.println("Returning to main menu...");
+	                        } else {
+	                            System.out.println("Invalid choice!");
+	                        }
+
+	                    } while (subChoice != 4);
+
 	                    break;
-	                    
 	                case 8:
+	                	System.out.println("Generate Account Statement");
+
+	                    System.out.print("Enter Account Number: ");
+	                    String inputAc = sc.nextLine().trim();
+	                    int accNumSt;
+	                    try {
+	                        accNumSt = Integer.parseInt(inputAc);
+	                    } catch (NumberFormatException e) {
+	                        System.out.println("Invalid input! Returning to main menu.");
+	                        break;
+	                    }
+
+	                    final int accountNumberToFind1 = accNumSt;
+	                    Optional<Account> accountOpt = accounts.stream()
+	                            .filter(a -> a.getAccountNumber() == accountNumberToFind1)
+	                            .findFirst();
+
+	                    if (accountOpt.isEmpty()) {
+	                        System.out.println("Account not found! Returning to main menu.");
+	                        break;
+	                    }
+
+	                    Account account4 = accountOpt.get();
+
+	                    
+	                    System.out.print("Enter PIN: ");
+	                    String pinInput4 = sc.nextLine().trim();
+	                    int pin4;
+	                    try {
+	                        pin = Integer.parseInt(pinInput4);
+	                    } catch (NumberFormatException e) {
+	                        System.out.println("Invalid PIN! Returning to main menu.");
+	                        break;
+	                    }
+
+	                    if (!account4.verifyPin(pin)) {
+	                        System.out.println("Invalid PIN not matched to account! Returning to main menu.");
+	                        break;
+	                    }
+
+	                   
+	                    System.out.println("===== Account Statement =====");
+	                    account4.displayAccountDetails();
+	                    System.out.println("\nTransaction History:");
+	                    account4.showTransactionHistory();
+
+	                    break;
+	                   
+                 
+	                case 9:
 	                {
 	                	System.out.println("Exit");
 	                	saveData();
@@ -499,7 +647,7 @@ public class BankApplication {
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
 	        }
-	        } while (choice != 7);
+	        } while (choice != 8);
 
 	        sc.close();
 	    }
