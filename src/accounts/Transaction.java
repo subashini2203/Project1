@@ -18,8 +18,8 @@ public class Transaction implements Serializable {
 	    private double finalBalance;
 	    private String type;
 	    
-	    public Transaction(int id,int accountNumber, String type, double amount, double initialBalance, double finalBalance, String status) {
-                this.transactionId = id;
+	    public Transaction(int accountNumber, String type, double amount, double initialBalance, double finalBalance, String status) {
+                this.transactionId = ++transactionCounter;
                 this.transactionTime = LocalDateTime.now();
                 this.accountNumber = accountNumber;
                 this.type = type;
@@ -29,8 +29,8 @@ public class Transaction implements Serializable {
                 this.status = status;
                 this.receiverAccountNumber = null;
 	    }
-	    public Transaction(int id,int fromAcc, int toAcc, double amount, double initialBalance, double finalBalance, String status) {
-	        this.transactionId = id;
+	    public Transaction(int fromAcc, int toAcc, double amount, double initialBalance, double finalBalance, String status) {
+	        this.transactionId = ++transactionCounter;
 	        this.transactionTime = LocalDateTime.now();
 	        this.accountNumber = fromAcc;
 	        this.receiverAccountNumber = toAcc;
@@ -66,7 +66,7 @@ public class Transaction implements Serializable {
 	        return transactionTime;
 	    }
 	    public static synchronized int getTransactionCounter() {
-	        return ++transactionCounter;
+	        return transactionCounter;
 	    }
 
 	    public static void setTransactionCounter(int counter) {

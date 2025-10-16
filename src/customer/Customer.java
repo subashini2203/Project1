@@ -14,9 +14,7 @@ public class Customer implements Serializable {
 	    private String address;
 	    private String emailId;
      
-	    public static void setIdCounter(int counter) {
-	        idCounter = counter;
-	    }
+	    
 	    
 	    public Customer( String name, long mobileNumber, String address, String emailId) {
 	        this.customerId =++idCounter;
@@ -25,8 +23,13 @@ public class Customer implements Serializable {
 	        this.address = address;
 	        this.emailId = emailId;
 	    }
-
-	
+	    public static void setIdCounter(int counter) {
+	        idCounter = counter;
+	    }
+	    public static int getIdCounter() {
+	        return idCounter;
+	    }
+	    
 	    public int getCustomerId() {
 	        return customerId;
 	    }
