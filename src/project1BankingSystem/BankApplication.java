@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import accounts.Account;
-import accounts.AccountCounter;
+
 import accounts.InvalidPinException;
 import customer.Customer;
-import customer.CustomerCounter;
+
 import accounts.Transaction;
 
 public class BankApplication {
@@ -40,6 +40,9 @@ public class BankApplication {
             System.out.println(fileName + " not found. Starting fresh.");
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading data from " + fileName + ": " + e.getMessage());
+        }catch(NullPointerException e) {
+        	System.out.println(fileName +"NullPointerException");
+        	return 1000;
         }
         return null;
     }
@@ -49,33 +52,26 @@ public class BankApplication {
    
             customers = (List<Customer>) loadData(CUSTOMER_FILE);
             accounts = (List<Account>) loadData(ACCOUNT_FILE);
-           
-//            
-//           int   transactionsCounter = (Integer) loadData(TRANSACTION_FILE);
-//          Transaction.setTransactionCounter( transactionsCounter);
-           
             
-            
-            AccountCounter accCounterObj = (AccountCounter) loadData(ACCOUNT_COUNTER_FILE);
-            if (accCounterObj != null) {
-                Account.setaccCounter(accCounterObj.getCounter());
-                
-                }
-            
-            
-            Object custObj = loadData(CUSTOMER_COUNTER_FILE);
-            if (custObj instanceof CustomerCounter) {
-                CustomerCounter custCounter = (CustomerCounter) custObj;
-                Customer.setIdCounter(custCounter.getCounter());
-               
-            }
+            Integer custCounter = (Integer) loadData(CUSTOMER_COUNTER_FILE);
+            if (custCounter != null)
+                Customer.setIdCounter(custCounter);
+            else
+                Customer.setIdCounter(1000); 
 
-           Object txnObj = loadData(TRANSACTION_FILE);
-           if (txnObj instanceof Integer) {
-               Transaction.setTransactionCounter((Integer) txnObj);
-            }
-            
-            if (customers == null) customers = new ArrayList<>(); 
+            Integer accCounter = (Integer) loadData(ACCOUNT_COUNTER_FILE);
+            if (accCounter != null)
+                Account.setaccCounter(accCounter);
+            else
+                Account.setaccCounter(1000); 
+
+            Integer txnCounter = (Integer) loadData(TRANSACTION_FILE);
+            if (txnCounter != null)
+                Transaction.setTransactionCounter(txnCounter);
+            else
+                Transaction.setTransactionCounter(1000);
+
+          if (customers == null) customers = new ArrayList<>(); 
             if (accounts == null) accounts = new ArrayList<>();
           
          }
@@ -93,12 +89,12 @@ public class BankApplication {
         saveData(CUSTOMER_FILE, customers);
         saveData(ACCOUNT_FILE, accounts);
         
+        Integer accCounter  = Account.getaccCounter();
+        saveData(ACCOUNT_COUNTER_FILE, accCounter);
         
-        AccountCounter accCounterObj = new AccountCounter(Account.getaccCounter());
-        saveData(ACCOUNT_COUNTER_FILE, accCounterObj);
         
-        CustomerCounter custCounterObj = new CustomerCounter(Customer.getIdCounter());
-        saveData(CUSTOMER_COUNTER_FILE, custCounterObj);
+       Integer custCounter  = Customer.getIdCounter();
+        saveData(CUSTOMER_COUNTER_FILE, custCounter);
     
 
         
@@ -611,7 +607,7 @@ public class BankApplication {
 	                default:
 	                    System.out.println("Invalid choice! Try again.");
 	        }
-	        } while (choice != 8);
+	        } while (choice != 9);
 
 	        sc.close();
 	    
